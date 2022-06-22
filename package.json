@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@adiwajshing/baileys": "github:adiwajshing/baileys",
+    "@adiwajshing/baileys": "^4.2.0",
     "@adiwajshing/keyed-db": "github:adiwajshing/keyed-db",
     "@hapi/boom": "^10.0.0",
     "@types/cors": "^2.8.12",
