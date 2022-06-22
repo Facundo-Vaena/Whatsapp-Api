@@ -120,17 +120,25 @@ export class WhatsappInstance {
       });
       resolve(scndPromise);
     });
-    // let userContacts: any[] = [];
-    // this.connection.ev.on(
-    //   "contacts.set",
-    //   async ({ contacts }: { contacts: any }) => {
-    //     const recivedContacts = contacts.slice(0, 5).map((contact: any) => {
-    //       return contact;
-    //     });
-    //     userContacts.push(...recivedContacts);
-    //   }
-    // );
-    // return userContacts;
+  };
+  getChats = async () => {
+    return new Promise(async (resolve, reject) => {
+      // const userContacts: any[] = [];
+      const scndPromise = await new Promise((resolve, reject) => {
+        this.connection.ev.on(
+          "chats.set",
+          async ({ chats }: { chats: any }) => {
+            const recivedChats = chats.slice(0, 5).map((chat: any) => {
+              console.log("single contact: ", chat);
+              return chat;
+            });
+            this.chats.push(...recivedChats);
+            resolve(this.chats);
+          }
+        );
+      });
+      resolve(scndPromise);
+    });
   };
 }
 

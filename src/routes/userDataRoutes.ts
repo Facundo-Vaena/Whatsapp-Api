@@ -1,18 +1,17 @@
 import { Router, Request, Response } from "express";
 // import { getChats, getContacts } from "../folder/whatsapp";
+import { findContacts, findChats } from "../services/baseMethods";
 const router = Router();
 
-router.post("/", async ({ body }: Request, res: Response) => {
-    // console.log("req at route: ", Object.keys(req));
-    const { instanceId } = body;
-    // console.log(body, "booody");
-    const instance = WhatsappInstances[instanceId];
-    const userContacts = await instance.getContacts();
-    // const userContacts = await getContacts(body.instanceId);
-    console.log("contacts from method: ", userContacts);
-    console.log("contacts from class property: ", instance.contacts);
-    // console.log(WhatsappInstances, "wppInstancesss");
-    res.json(userContacts);
+router.get("/:instanceId", async ({ params }: Request, res: Response) => {
+    const { instanceId } = params;
+    console.log(params, "paarams");
+    const userContacts = await findContacts(instanceId);
+    const userChats = await findChats(instanceId);
+    // const instance = WhatsappInstances[instanceId];
+    // const userContacts = await instance?.getContacts();
+    // console.log("contacts from method: ", userContacts);
+    res.json({userContacts, userChats});
 })
 
 export default router;
