@@ -5,43 +5,37 @@ const fs = require("fs");
 const router = Router();
 
 router.get("/", async (req: Request, res: Response) => {
-    // const response: any = await setConnection();
-    const connection = new WhatsappInstance();
-    const response: any = await connection.setConnection();
-    console.log(connection, "clase instanciada");
-    const { qrCode } = response;
-    const { registrationId } = connection.connection.authState.creds;
+    const connection = new WhatsappInstance(); 
+    const data = await connection.init();
+    const qrCode = connection.qrCode;
+
+    const { registrationId } = connection.connection.authState.creds;   
     WhatsappInstances[registrationId] = connection;
-    // console.log(this.connection.authState.creds, "credenciales");
+    
+    console.log("data: ", data);
+    console.log("connection: ", connection);
+
 
     res.json({ qrCode, registrationId });
-    console.log("response: ", response);   
-    console.log("eeev: ", response.socket.ev); 
-    console.log("qrrr: ", qrCode);
-    // fs.readFile("../qrcode.json", "utf8", (err: any, data: any) => {
-    //     console.log("dataaa: ", data);
-    // })
-    // const chats = await instance.getChats(socket);
-    // console.log("chats: ", chats);
-    // console.log("qr recibido: ", qrCode);
-    // fs.readFile("../qrcode.json", (err: any, data: any) => {
-    //     if (err) throw err;
-    //     console.log("data: ", data);
-    // })
-    // setConnection().then(({ socket, qrCode }: any) => {
-    //     const algo = fs.readFileSync("../qrcode.json", "utf8");
-    //     console.log("algo: ", algo);
-    //     res.json(algo);
-    // })
-    // const qrExistence = fs.existsSync("../qrcode.json");
-    // if (qrExistence) {
-    //     console.log("existe qr");
-    //     const algo = fs.readFileSync("../qrcode.json", "utf8");
-    //     console.log("algo: ", algo);
-    // }
-    // res.json({qrCode})
-    // res.json(chats);
+    // const connection = new WhatsappInstance();
+    // const response: any = await connection.setConnection();
+    // console.log(connection, "clase instanciada");
+    // const { qrCode } = response;
+    // const { registrationId } = connection.connection.authState.creds;
+    // WhatsappInstances[registrationId] = connection;
+
+    // res.json({ qrCode, registrationId });
 });
+
+
+router.get("/qr/:instanceId", async ({ params }: Request, res: Response) => {
+    const { instanceId } = params;
+    console.log("instanceId: ", instanceId);
+    const qr = await WhatsappInstances[instanceId]?.qrCode;
+    console.log(WhatsappInstances[instanceId], "instancia especifica");
+    console.log("qrrr: ", qr);
+    res.json({qr});
+})
 
 
 export default router;
