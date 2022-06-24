@@ -14,6 +14,7 @@ export class WhatsappInstance {
   connection: any = {};
   contacts: any[] = [];
   chats: any[] = [];
+  messages: any[] = [];
   qrCode: any = "no";
 
   async init() {
@@ -119,7 +120,20 @@ export class WhatsappInstance {
         // resolve(this.contacts);
       }
     );
-
+    this.connection.ev.on(
+      "mesagges.set",
+      async ({ messages }: { messages: any }) => {
+        const recivedMessages = messages.map((message: any) => message);
+        // userContacts.push(...recivedContacts);
+        this.messages.push(...recivedMessages);
+        // resolve(this.contacts);
+      }
+    );  
+    this.connection.ev.on("messages.upsert", (m: any) => {
+      console.log("msg upsert: ", m)
+      console.log("m[0].message", m[0].message);
+    });
+    this.connection.ev.on("messages.update", (m: any) => {console.log("msg update: ", m)});
     // });
     // const result = await Promise.all([fstPromise, scndPromise])
     // console.log("promise all result: ", result);
