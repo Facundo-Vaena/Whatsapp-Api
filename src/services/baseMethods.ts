@@ -18,9 +18,6 @@ export const findChats = async (instanceId: string) => {
 
 export const getData = async (instanceId: string) => {
     const { contacts, chats, messages } = await WhatsappInstances[instanceId];
-    console.log("contactsss: ", contacts[0]);
-    console.log("chatss: ", chats[0]);
-    console.log("messagesss: ", messages);
     return { contacts, chats, messages };
 }
 

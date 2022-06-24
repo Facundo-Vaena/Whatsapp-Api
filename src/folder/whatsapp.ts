@@ -32,7 +32,6 @@ export class WhatsappInstance {
     if (this.connection.authState.creds)
       socket.ev.on("creds.update", saveState);
     this.setConnection();
-    console.log("thiss: ", this);
     return this;
   }
 
@@ -53,18 +52,11 @@ export class WhatsappInstance {
     // const scndPromise = await new Promise((resolve, reject) => {
 
     const socket = this.connection;
-    console.log("setConnection socket: ", socket);
-    const fileExistence = fs.existsSync(SESSION);
-
-    // const fstPromise = new Promise((resolve, reject) => {
     socket.ev.on("connection.update", async (update: any) => {
       const { connection, lastDisconnect, qr } = update;
       if (qr) {
-        console.log("entre al if hay qr");
         const url = await QRcode.toDataURL(qr);
         this.qrCode = url;
-        console.log("this.qrCode after update: ", this.qrCode);
-        // resolve(this.qrCode);
       }
 
       if (connection === "close") {
@@ -75,10 +67,20 @@ export class WhatsappInstance {
         } else if (reason === DisconnectReason.connectionLost) {
           console.log("connection lost, reconnecting");
           this.init();
-        } else if (reason === DisconnectReason.connectionReplaced) {
+        }
+         else if (reason === DisconnectReason.connectionReplaced) {
           console.log("connection replaced");
+          console.log("voy a desloguear (socket.logout)");
           socket.logout();
-        } else if (reason === DisconnectReason.loggedOut) {
+          // if (fs.existsSync(SESSION)) {
+          //   fs.unlink(`${SESSION}`, (err: any) => {
+          //     if (err) throw err;
+          //     console.log("file was deleted");
+          //   });
+          // }
+          this.init();
+        }
+         else if (reason === DisconnectReason.loggedOut) {
           console.log("device loggedout");
           if (fs.existsSync(SESSION)) {
             fs.unlink(`${SESSION}`, (err: any) => {
@@ -91,12 +93,18 @@ export class WhatsappInstance {
           console.log("restart required. Restarting...");
           this.init();
         } else {
+          console.log("voy a cerrar (socket.end)");
           socket.end(
             new Error(
               `unknow disconnect reason: ${reason}|${lastDisconnect?.error}`
             )
           );
         }
+      } else if (connection === "open") {
+        console.log("connection already open");
+      } else if (connection === "connecting") return;
+      else {
+        console.log("ni abierta ni cerrada: ", connection);
       }
     });
     // });
@@ -111,15 +119,12 @@ export class WhatsappInstance {
         // resolve(this.contacts);
       }
     );
-    this.connection.ev.on(
-      "chats.set",
-      async ({ chats }: { chats: any }) => {
-        const recivedChats = chats.map((chat: any) => chat);
-        // userContacts.push(...recivedContacts);
-        this.chats.push(...recivedChats);
-        // resolve(this.contacts);
-      }
-    );
+    this.connection.ev.on("chats.set", async ({ chats }: { chats: any }) => {
+      const recivedChats = chats.map((chat: any) => chat);
+      // userContacts.push(...recivedContacts);
+      this.chats.push(...recivedChats);
+      // resolve(this.contacts);
+    });
     this.connection.ev.on(
       "mesagges.set",
       async ({ messages }: { messages: any }) => {
@@ -128,12 +133,16 @@ export class WhatsappInstance {
         this.messages.push(...recivedMessages);
         // resolve(this.contacts);
       }
-    );  
+    );
     this.connection.ev.on("messages.upsert", (m: any) => {
-      console.log("msg upsert: ", m)
-      console.log("m[0].message", m[0].message);
+      // console.log("m[0].message", m[0].message);
+      // console.log("msg upsert: ", m);
+      console.log("msg upsert");
     });
-    this.connection.ev.on("messages.update", (m: any) => {console.log("msg update: ", m)});
+    this.connection.ev.on("messages.update", (m: any) => {
+      // console.log("msg update: ", m);
+      console.log("msg update");
+    });
     // });
     // const result = await Promise.all([fstPromise, scndPromise])
     // console.log("promise all result: ", result);
