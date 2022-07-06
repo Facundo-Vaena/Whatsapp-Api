@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
+import { request } from "http";
 // import { getChats, getContacts } from "../folder/whatsapp";
-import { getData } from "../services/baseMethods";
+import { getData, sendMessage } from "../services/baseMethods";
 const router = Router();
 
 router.get("/:instanceId", async ({ params }: Request, res: Response) => {
@@ -14,5 +15,6 @@ router.get("/:instanceId", async ({ params }: Request, res: Response) => {
     const data = await getData(instanceId);
     res.json(data);
 })
+
 
 export default router;

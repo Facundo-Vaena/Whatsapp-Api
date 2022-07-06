@@ -35,3 +35,9 @@ export const getQrCode = async (instanceId: string) => {
     const qr = await WhatsappInstances[instanceId]?.qrCode;
     return qr;
 }
+
+export const sendMessage = async (instanceId: string, addreseeId: string, message: string) => {
+    const connection = WhatsappInstances[instanceId].connection;
+    const sendMsg = await connection.sendMessage(addreseeId, {text: message});
+    return sendMsg;
+}

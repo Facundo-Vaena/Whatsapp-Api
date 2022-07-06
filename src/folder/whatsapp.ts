@@ -5,6 +5,7 @@ import makeWASocket, {
   makeInMemoryStore,
 } from "@adiwajshing/baileys";
 import { Boom } from "@hapi/boom";
+import { downloadMessage } from "../services/downloadMessage";
 const QRcode = require("qrcode");
 import path from "path";
 const fs = require("fs");
@@ -50,7 +51,7 @@ export class WhatsappInstance {
     // this.connection = socket;
     // console.log(this.connection.authState.creds, "credenciales");
     // const scndPromise = await new Promise((resolve, reject) => {
-
+    console.log("instances: ", WhatsappInstances);
     const socket = this.connection;
     socket.ev.on("connection.update", async (update: any) => {
       const { connection, lastDisconnect, qr } = update;
@@ -63,12 +64,12 @@ export class WhatsappInstance {
         const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
         if (reason === DisconnectReason.connectionClosed) {
           console.log("connection closed, reconnecting...");
+          console.log("entre a closed");
           this.init();
         } else if (reason === DisconnectReason.connectionLost) {
           console.log("connection lost, reconnecting");
           this.init();
-        }
-         else if (reason === DisconnectReason.connectionReplaced) {
+        } else if (reason === DisconnectReason.connectionReplaced) {
           console.log("connection replaced");
           console.log("voy a desloguear (socket.logout)");
           socket.logout();
@@ -79,8 +80,7 @@ export class WhatsappInstance {
           //   });
           // }
           this.init();
-        }
-         else if (reason === DisconnectReason.loggedOut) {
+        } else if (reason === DisconnectReason.loggedOut) {
           console.log("device loggedout");
           if (fs.existsSync(SESSION)) {
             fs.unlink(`${SESSION}`, (err: any) => {
@@ -91,6 +91,9 @@ export class WhatsappInstance {
           this.init();
         } else if (reason === DisconnectReason.restartRequired) {
           console.log("restart required. Restarting...");
+          this.init();
+        } else if (reason === DisconnectReason.badSession) {
+          console.log("bad session");
           this.init();
         } else {
           console.log("voy a cerrar (socket.end)");
@@ -136,12 +139,48 @@ export class WhatsappInstance {
     );
     this.connection.ev.on("messages.upsert", (m: any) => {
       // console.log("m[0].message", m[0].message);
-      // console.log("msg upsert: ", m);
+      console.log("msg upsert: ", m);
+      // const recivedMessages = m.map((message: any) => message);
+      // this.messages.push(...recivedMessages)
+      const { messages: objectMessage }: any = m;
+      const { message, messageTimestamp, status, participant }: any = objectMessage[0];
+      const messageData = { message, messageTimestamp, status, participant };
+      console.log("messageData: ", messageData);
+      this.messages.push(messageData)
       console.log("msg upsert");
+
+      // m.messages.map(async (msg: any) => {
+      //   if (!msg.message) return;
+      //   if (msg.key.fromMe) return;
+      //   const messageType = Object.keys(msg.message)[0];
+      //   console.log("message type: ", messageType);
+
+      // })
     });
     this.connection.ev.on("messages.update", (m: any) => {
-      // console.log("msg update: ", m);
-      console.log("msg update");
+      console.log("msg update: ");
+      // const recivedMessages = m.map( async ({key}: any) =>{
+      //   const { id, remoteJid } = key;
+      //   console.log("keyy: ", key);
+      //   const newKey = {
+      //     remoteJid,
+      //     id,
+      //     participant: undefined
+      //   };
+      //   console.log("newKeyy: ", newKey);
+      //   const content = await this.connection.readMessages([newKey]);
+      //   console.log("contentt: ", content);
+      //   const obj = {...newKey, content};
+      //   console.log("objj: ", obj);
+      //   return obj
+      //   });
+      // const recivedMessages = m.map((msg: any) => {
+      //   const msgType = Object.keys(msg.message)[0];
+      //   const content = downloadMessage(msg, msgType);
+      //   console.log("contentt: ", content);
+      // })
+      // this.messages.push(...recivedMessages);
+      // console.log("msg update");
     });
     // });
     // const result = await Promise.all([fstPromise, scndPromise])
